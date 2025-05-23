@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RozanaKart - Your Essentials Delivered</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    .category-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: linear-gradient(145deg, #ffffff, #f5f5f5);
+      border-radius: 12px;
+      cursor: pointer;
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+    }
+    .category-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    .launching-soon {
+      position: absolute;
+      inset: 0;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease-in-out;
+    }
+    .category-card:hover .launching-soon {
+      opacity: 1;
+    }
+    .launching-soon h4 {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+    .hero-bg {
+      background: linear-gradient(135deg, #50226e 0%, #a9d0dd 100%);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white shadow-md py-4">
+  <div class="container mx-auto px-4 flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
+    <div class="flex items-center space-x-4 w-full sm:w-auto">
+      <button onclick="window.history.back()" class="text-white bg-green-600 hover:bg-green-700 px-3 py-1 rounded-md">
+        ← Back
+      </button>
+      <h1 class="text-2xl font-bold text-green-500">RozanaKart</h1>
+    </div>
+    <div class="flex items-center w-full sm:w-auto space-x-2">
+      <input id="searchInput" type="text" placeholder="Search..." class="w-full sm:w-auto flex-grow px-3 py-1 rounded-l-md text-black border border-green-300" />
+      <button id="searchBtn" class="bg-green-600 text-white px-3 py-1 rounded-r-md hover:bg-green-700">Search</button>
+      <span class="ml-2 text-2xl cursor-pointer">🛒</span>
+    </div>
+  </div>
+</header>
+
+<!-- Hero Section -->
+<section class="hero-bg py-14 sm:py-20 text-center px-4 text-white">
+  <div class="max-w-xl mx-auto">
+    <h2 class="text-3xl sm:text-4xl font-bold mb-3">🚀 Fast Grocery Delivery!</h2>
+    <p class="text-lg mb-2">Get essentials delivered to your doorstep in minutes.</p>
+    <p class="font-bold text-yellow-300 mt-2">🎉 Unlock your Free Delivery above ₹99!</p>
+  </div>
+</section>
+
+<!-- Category Grid -->
+<section class="container mx-auto px-4 my-10">
+  <h3 class="text-2xl font-bold text-center mb-8">🛍️ Shop by Category</h3>
+  
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+    
+    <!-- Cold Drinks -->
+    <a href="colddrinks.html" class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🥤</div>
+      <h4 class="font-semibold">Cold Drinks</h4>
+    </a>
+
+    <!-- Snacks -->
+    <a href="snack.html" class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🍟</div>
+      <h4 class="font-semibold">Snacks</h4>
+    </a>
+
+    <!-- Ice Cream -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🍦</div>
+      <h4 class="font-semibold">Ice Cream</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+    <!-- Spices -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🌶️</div>
+      <h4 class="font-semibold">Spices</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+    <!-- Personal Care -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🧴</div>
+      <h4 class="font-semibold">Personal Care</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+    <!-- Household Items -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🧹</div>
+      <h4 class="font-semibold">Household Items</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+    <!-- Baby Care -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🍼</div>
+      <h4 class="font-semibold">Baby Care</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+    <!-- Dairy Products -->
+    <div class="category-card p-4 text-center">
+      <div class="text-3xl mb-2">🥛</div>
+      <h4 class="font-semibold">Dairy Products</h4>
+      <div class="launching-soon"><h4>Launching Soon</h4></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-green-700 text-white py-6 text-center mt-16 rounded-t-lg px-4">
+  <p class="text-sm sm:text-base">&copy; 2025 RozanaKart. All rights reserved.</p>
+  <p class="text-sm sm:text-base">RozanaKart delivers groceries and essentials in Handwara, Kashmir.</p>
+</footer>
+
+</body>
+</html>

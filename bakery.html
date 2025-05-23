@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bakery - RozanaKart</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* Card hover effects */
+    .card {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Item tags */
+    .item-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(236, 72, 153, 0.9);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      z-index: 10;
+    }
+    
+    /* Cart sidebar styles */
+    .cart-sidebar {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      width: 90vw;
+      max-width: 400px;
+    }
+    .cart-sidebar.open {
+      transform: translateX(0);
+    }
+    .cart-overlay {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .cart-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* Animation for added items */
+    .added-to-cart {
+      animation: bounce 0.5s;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    /* Image sizing */
+    .item-img {
+      height: 120px;
+      object-fit: contain;
+      width: 100%;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .item-img {
+      transform: scale(1.05);
+    }
+    
+    @media (min-width: 640px) {
+      .item-img {
+        height: 150px;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .item-img {
+        height: 160px;
+      }
+    }
+    
+    /* Product title */
+    .product-title {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 3em;
+      line-height: 1.5em;
+    }
+    
+    /* Header sticky behavior */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    /* Search modal */
+    .search-modal {
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    .search-modal.open {
+      transform: translateY(0);
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+      .desktop-search {
+        display: none;
+      }
+      .header {
+        padding: 12px;
+      }
+    }
+    
+    @media (min-width: 641px) {
+      .mobile-search-btn {
+        display: none;
+      }
+    }
+    
+    /* Smooth transitions */
+    .transition-slow {
+      transition: all 0.3s ease;
+    }
+    
+    /* Pulse animation for search button */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .pulse:hover {
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* Category tabs */
+    .category-tab {
+      transition: all 0.3s ease;
+    }
+    .category-tab.active {
+      background-color: #ec4899;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="header bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center cursor-pointer" onclick="window.location.href='index.html'">
+        <span class="text-xl md:text-2xl font-bold text-pink-600">RozanaKart</span>
+      </div>
+      
+      <!-- Desktop location -->
+      <div class="hidden md:flex items-center text-sm cursor-pointer ml-4">
+        <i class="fas fa-map-marker-alt text-pink-600 mr-1"></i>
+        <span class="font-medium">Handwara, Kashmir</span>
+      </div>
+      
+      <!-- Desktop Search bar -->
+      <div class="hidden md:flex flex-1 mx-4 max-w-md">
+        <div class="desktop-search relative flex items-center bg-gray-100 rounded-full px-4 py-2 w-full">
+          <i class="fas fa-search text-gray-500 mr-2"></i>
+          <input 
+            type="text" 
+            placeholder="Search bakery items..." 
+            class="w-full bg-transparent outline-none text-sm placeholder-gray-500"
+            id="desktop-search-input"
+          />
+        </div>
+      </div>
+      
+      <!-- User actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Mobile search button -->
+        <button class="mobile-search-btn text-gray-600" id="mobile-search-btn">
+          <i class="fas fa-search text-xl"></i>
+        </button>
+        
+        <button class="hidden md:flex items-center text-sm font-medium">
+          <i class="fas fa-user-circle text-xl text-gray-600"></i>
+        </button>
+        <button class="relative" id="cart-icon">
+          <i class="fas fa-shopping-cart text-xl text-gray-600"></i>
+          <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Search Modal -->
+    <div class="search-modal absolute top-0 left-0 w-full bg-white shadow-md py-3 px-4 z-40" id="search-modal">
+      <div class="flex items-center">
+        <div class="relative flex items-center bg-gray-100 rounded-full px-4 py-2 w-full">
+          <i class="fas fa-search text-gray-500 mr-2"></i>
+          <input 
+            type="text" 
+            placeholder="Search bakery items..." 
+            class="w-full bg-transparent outline-none text-sm placeholder-gray-500"
+            id="mobile-search-input"
+          />
+          <button class="ml-2 text-gray-500" id="close-search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-4 md:p-6">
+    <!-- Hero section -->
+    <div class="bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl p-6 mb-6 text-white text-center">
+      <h1 class="text-2xl md:text-3xl font-bold mb-2">Fresh Bakery Delivered Daily</h1>
+      <p class="text-sm md:text-base mb-4">Order before 3pm for same-day delivery in Handwara</p>
+      <div class="flex justify-center space-x-2">
+        <span class="bg-white text-pink-600 px-3 py-1 rounded-full text-xs font-bold">⭐ 4.8 Rating</span>
+        <span class="bg-white text-pink-600 px-3 py-1 rounded-full text-xs font-bold">🍞 Fresh Daily</span>
+      </div>
+    </div>
+
+    <!-- Category tabs -->
+    <div class="flex overflow-x-auto space-x-2 mb-6 pb-2">
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium active" data-category="all">
+        All Items
+      </button>
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium" data-category="bread">
+        Breads
+      </button>
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium" data-category="pastry">
+        Pastries
+      </button>
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium" data-category="cake">
+        Cakes
+      </button>
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium" data-category="essential">
+        Essentials
+      </button>
+      <button class="category-tab whitespace-nowrap px-4 py-2 rounded-full border border-gray-200 bg-white text-sm font-medium" data-category="special">
+        Specials
+      </button>
+    </div>
+
+    <!-- Items grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="items-grid">
+
+      <!-- Breads -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="bread">
+        <span class="item-tag">🍞 Popular</span>
+        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Whole Wheat Bread" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Whole Wheat Bread</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹45</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Whole Wheat Bread" data-price="45" data-img="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="bread">
+          Add to Cart
+        </button>
+      </div>
+
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="bread">
+        <span class="item-tag">🥖 Fresh</span>
+        <img src="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="White Sandwich Bread" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">White Sandwich Bread</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹40</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="White Sandwich Bread" data-price="40" data-img="https://images.unsplash.com/photo-1549931319-a545dcf3bc73?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="bread">
+          Add to Cart
+        </button>
+      </div>
+
+      <!-- Pastries -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="pastry">
+        <span class="item-tag">🥐 Flaky</span>
+        <img src="https://images.unsplash.com/photo-1567327613481-ccb6fb4b0358?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Croissant" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Croissant</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹35</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Croissant" data-price="35" data-img="https://images.unsplash.com/photo-1567327613481-ccb6fb4b0358?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="pastry">
+          Add to Cart
+        </button>
+      </div>
+
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="pastry">
+        <span class="item-tag">🍫 Chocolate</span>
+        <img src="https://images.unsplash.com/photo-1559620192-032c4bc4674e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Chocolate Croissant" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Chocolate Croissant</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹45</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Chocolate Croissant" data-price="45" data-img="https://images.unsplash.com/photo-1559620192-032c4bc4674e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="pastry">
+          Add to Cart
+        </button>
+      </div>
+
+      <!-- Cakes -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="cake">
+        <span class="item-tag">🎂 Special</span>
+        <img src="https://images.unsplash.com/photo-1611293388250-580b08c4a145?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Red Velvet Cake" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Red Velvet Cake</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹520</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Red Velvet Cake" data-price="520" data-img="https://images.unsplash.com/photo-1611293388250-580b08c4a145?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="cake">
+          Add to Cart
+        </button>
+      </div>
+
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="cake">
+        <span class="item-tag">🍒 Classic</span>
+        <img src="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Black Forest Cake" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Black Forest Cake</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹480</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Black Forest Cake" data-price="480" data-img="https://images.unsplash.com/photo-1578985545062-69928b1d9587?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="cake">
+          Add to Cart
+        </button>
+      </div>
+
+      <!-- Essentials -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="essential">
+        <span class="item-tag">🍪 Daily</span>
+        <img src="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Butter Cookies" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Butter Cookies (12pc)</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹80</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Butter Cookies (12pc)" data-price="80" data-img="https://images.unsplash.com/photo-1558961363-fa8fdf82db35?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="essential">
+          Add to Cart
+        </button>
+      </div>
+
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="essential">
+        <span class="item-tag">🥯 Pack</span>
+        <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Pav Buns" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Pav Buns (6pc)</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹30</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Pav Buns (6pc)" data-price="30" data-img="https://images.unsplash.com/photo-1509440159596-0249088772ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="essential">
+          Add to Cart
+        </button>
+      </div>
+
+      <!-- Specials -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="special">
+        <span class="item-tag">🌟 Premium</span>
+        <img src="https://images.unsplash.com/photo-1508739826987-b79cd8b7da12?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Macarons" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Macarons (6pc)</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹300</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Macarons (6pc)" data-price="300" data-img="https://images.unsplash.com/photo-1508739826987-b79cd8b7da12?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="special">
+          Add to Cart
+        </button>
+      </div>
+
+      <div class="bg-white p-3 rounded-xl card border border-gray-100" data-category="special">
+        <span class="item-tag">🎁 Gift</span>
+        <img src="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" alt="Fruit Tart" class="w-full item-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Premium Fruit Tart</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹350</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Premium Fruit Tart" data-price="350" data-img="https://images.unsplash.com/photo-1563729784474-d77dbb933a9e?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80" data-category="special">
+          Add to Cart
+        </button>
+      </div>
+
+      <!-- More items... -->
+    </div>
+  </main>
+
+  <!-- Mobile floating action button -->
+  <div class="md:hidden fixed bottom-6 right-6 z-40">
+    <button id="mobile-cart-btn" class="bg-pink-600 text-white rounded-full p-4 shadow-lg pulse">
+      <i class="fas fa-shopping-cart text-xl"></i>
+      <span class="absolute -top-1 -right-1 bg-white text-pink-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold" id="mobile-cart-count">0</span>
+    </button>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay fixed inset-0 bg-black bg-opacity-50 z-50"></div>
+  <div class="cart-sidebar fixed top-0 right-0 h-full bg-white shadow-lg z-50 overflow-y-auto">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Your Bakery Cart</h2>
+        <button id="close-cart" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <div id="cart-items" class="flex-1 overflow-y-auto mb-4">
+        <!-- Cart items will be added here dynamically -->
+        <div class="flex flex-col items-center justify-center h-full" id="empty-cart-message">
+          <i class="fas fa-shopping-basket text-4xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-center">Your cart is empty</p>
+          <p class="text-sm text-gray-400 mt-2">Add some delicious bakery items!</p>
+        </div>
+      </div>
+      
+      <div class="border-t pt-4">
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">Subtotal:</span>
+          <span class="font-bold" id="cart-subtotal">₹0</span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">Handling Charges:</span>
+          <span class="font-bold">₹10</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold mb-4">
+          <span>Total:</span>
+          <span id="cart-total">₹10</span>
+        </div>
+        
+        <button id="checkout-btn" class="w-full bg-green-500 text-white py-3 rounded-lg font-bold hover:bg-green-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-2" disabled>
+          <i class="fab fa-whatsapp mr-2"></i> Order via WhatsApp (6006366254)
+        </button>
+        <p class="text-xs text-center text-gray-500">You'll be redirected to WhatsApp to complete your order</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-pink-700 text-white py-6 text-center mt-8">
+    <div class="container mx-auto px-4">
+      <p class="text-sm">&copy; 2025 RozanaKart. All rights reserved.</p>
+      <p class="text-xs mt-2">Fresh bakery delivered in Handwara, Kashmir</p>
+      <div class="mt-4 flex justify-center space-x-4">
+        <a href="tel:6006366254" class="flex items-center text-sm">
+          <i class="fas fa-phone-alt mr-2"></i> 6006366254
+        </a>
+        <a href="https://wa.me/916006366254" target="_blank" class="flex items-center text-sm">
+          <i class="fab fa-whatsapp mr-2"></i> WhatsApp
+        </a>
+      </div>
+    </div>
+  </footer>
+
+ <script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // Initialize cart
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartCountElements = [document.getElementById('cart-count'), document.getElementById('mobile-cart-count')];
+    const cartItemsContainer = document.getElementById('cart-items');
+    const emptyCartMessage = document.getElementById('empty-cart-message');
+    const cartSubtotal = document.getElementById('cart-subtotal');
+    const cartTotal = document.getElementById('cart-total');
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const cartIcon = document.getElementById('cart-icon');
+    const mobileCartBtn = document.getElementById('mobile-cart-btn');
+    const closeCartBtn = document.getElementById('close-cart');
+    const cartSidebar = document.querySelector('.cart-sidebar');
+    const cartOverlay = document.querySelector('.cart-overlay');
+    const mobileSearchBtn = document.getElementById('mobile-search-btn');
+    const closeSearchBtn = document.getElementById('close-search');
+    const searchModal = document.getElementById('search-modal');
+    const desktopSearchInput = document.getElementById('desktop-search-input');
+    const mobileSearchInput = document.getElementById('mobile-search-input');
+    const itemsGrid = document.getElementById('items-grid');
+    const itemCards = document.querySelectorAll('.card');
+    const categoryTabs = document.querySelectorAll('.category-tab');
+
+    // Update cart count display
+    function updateCartCount() {
+      const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+      cartCountElements.forEach(el => el.textContent = totalItems);
+    }
+
+    // Update cart display
+    function updateCartDisplay() {
+      cartItemsContainer.innerHTML = '';
+
+      if (cart.length === 0) {
+        cartItemsContainer.appendChild(emptyCartMessage);
+        checkoutBtn.disabled = true;
+      } else {
+        if (!cartItemsContainer.contains(emptyCartMessage)) {
+          emptyCartMessage.remove();
+        }
+        checkoutBtn.disabled = false;
+
+        cart.forEach((item, index) => {
+          const cartItem = document.createElement('div');
+          cartItem.className = 'flex justify-between items-center py-3 border-b';
+          cartItem.innerHTML = `
+            <div class="flex items-center">
+              <img src="${item.img}" alt="${item.name}" class="w-12 h-12 rounded-md object-cover mr-3">
+              <div>
+                <h4 class="font-medium text-sm">${item.name}</h4>
+                <p class="text-xs text-gray-500">₹${item.price} each</p>
+              </div>
+            </div>
+            <div class="flex items-center">
+              <div class="flex items-center mr-3">
+                <button class="decrease-quantity text-gray-500 hover:text-pink-600" data-index="${index}">
+                  <i class="fas fa-minus text-xs"></i>
+                </button>
+                <span class="mx-2 text-sm">${item.quantity}</span>
+                <button class="increase-quantity text-gray-500 hover:text-pink-600" data-index="${index}">
+                  <i class="fas fa-plus text-xs"></i>
+                </button>
+              </div>
+              <p class="font-bold text-sm mr-2">₹${item.price * item.quantity}</p>
+              <button class="remove-item text-red-500 hover:text-red-700" data-index="${index}">
+                <i class="fas fa-trash text-sm"></i>
+              </button>
+            </div>
+          `;
+          cartItemsContainer.appendChild(cartItem);
+        });
+      }
+
+      const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const handlingCharges = 10;
+      const total = subtotal + handlingCharges;
+
+      cartSubtotal.textContent = `₹${subtotal}`;
+      cartTotal.textContent = `₹${total}`;
+
+      updateCartCount();
+      localStorage.setItem('cart', JSON.stringify(cart));
+    }
+
+    // Add to cart
+    document.querySelectorAll('.add-to-cart').forEach(button => {
+      button.addEventListener('click', function () {
+        const name = this.getAttribute('data-name');
+        const price = parseInt(this.getAttribute('data-price'));
+        const img = this.getAttribute('data-img');
+        const category = this.getAttribute('data-category');
+
+        const existingItemIndex = cart.findIndex(item => item.name === name);
+
+        if (existingItemIndex !== -1) {
+          cart[existingItemIndex].quantity += 1;
+        } else {
+          cart.push({ name, price, img, category, quantity: 1 });
+        }
+
+        updateCartDisplay();
+
+        cartSidebar.classList.add('open');
+        cartOverlay.classList.add('open');
+
+        this.classList.add('added-to-cart');
+        setTimeout(() => {
+          this.classList.remove('added-to-cart');
+        }, 500);
+      });
+    });
+
+    // Handle quantity change and removal
+    cartItemsContainer.addEventListener('click', function (e) {
+      if (e.target.closest('.increase-quantity')) {
+        const index = e.target.closest('.increase-quantity').getAttribute('data-index');
+        cart[index].quantity += 1;
+        updateCartDisplay();
+      } else if (e.target.closest('.decrease-quantity')) {
+        const index = e.target.closest('.decrease-quantity').getAttribute('data-index');
+        if (cart[index].quantity > 1) {
+          cart[index].quantity -= 1;
+        } else {
+          cart.splice(index, 1);
+        }
+        updateCartDisplay();
+      } else if (e.target.closest('.remove-item')) {
+        const index = e.target.closest('.remove-item').getAttribute('data-index');
+        cart.splice(index, 1);
+        updateCartDisplay();
+      }
+    });
+
+    // Cart sidebar toggle
+    function openCart() {
+      cartSidebar.classList.add('open');
+      cartOverlay.classList.add('open');
+    }
+
+    cartIcon.addEventListener('click', openCart);
+    mobileCartBtn.addEventListener('click', openCart);
+
+    closeCartBtn.addEventListener('click', function () {
+      cartSidebar.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+
+    cartOverlay.addEventListener('click', function () {
+      cartSidebar.classList.remove('open');
+      cartOverlay.classList.remove('open');
+    });
+
+    // Checkout to WhatsApp
+    checkoutBtn.addEventListener('click', function () {
+      if (cart.length === 0) return;
+
+      let message = `Hello RozanaKart! I'd like to place an order:\n\n`;
+
+      cart.forEach(item => {
+        message += `${item.name} - ${item.quantity} x ₹${item.price} = ₹${item.quantity * item.price}\n`;
+      });
+
+      const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+      const handlingCharges = 10;
+      const total = subtotal + handlingCharges;
+
+      message += `\nSubtotal: ₹${subtotal}`;
+      message += `\nHandling Charges: ₹${handlingCharges}`;
+      message += `\nTotal: ₹${total}`;
+      message += `\n\nDelivery to: [Your Address]`;
+      message += `\nPayment method: [Cash on Delivery/Online Payment]`;
+      message += `\n\nPlease confirm my order. Thank you!`;
+
+      const encodedMessage = encodeURIComponent(message);
+      window.open(`https://wa.me/916006366254?text=${encodedMessage}`, '_blank');
+    });
+
+    // Search functionality
+    function filterItems(searchTerm) {
+      const term = searchTerm.toLowerCase();
+      itemCards.forEach(card => {
+        const title = card.querySelector('.product-title').textContent.toLowerCase();
+        card.style.display = title.includes(term) ? 'block' : 'none';
+      });
+    }
+
+    desktopSearchInput.addEventListener('input', function () {
+      filterItems(this.value);
+    });
+
+    mobileSearchInput.addEventListener('input', function () {
+      filterItems(this.value);
+    });
+
+    // Mobile search modal toggle
+    mobileSearchBtn.addEventListener('click', function () {
+      searchModal.classList.add('open');
+      mobileSearchInput.focus();
+    });
+
+    closeSearchBtn.addEventListener('click', function () {
+      searchModal.classList.remove('open');
+    });
+
+    // Category filtering
+    function filterByCategory(category) {
+      itemCards.forEach(card => {
+        const cardCategory = card.getAttribute('data-category');
+        card.style.display = category === 'all' || cardCategory === category ? 'block' : 'none';
+      });
+    }
+
+    categoryTabs.forEach(tab => {
+      tab.addEventListener('click', function () {
+        categoryTabs.forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+
+        const category = this.getAttribute('data-category');
+        filterByCategory(category);
+      });
+    });
+
+    // Initialize cart
+    updateCartDisplay();
+  });
+</script>

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RozanaKart - Cold Drinks</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <style>
+    /* Custom styles */
+    .product-card {
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .product-image {
+      height: 120px;
+      width: auto;
+      object-fit: contain;
+    }
+    .cart-badge {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background-color: #ef4444;
+      color: white;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+    }
+    .chill-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(88, 23, 192, 0.9);
+      color: white;
+      padding: 2px 6px;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      z-index: 10;
+      text-shadow: 0 0 2px rgba(0,0,0,0.6);
+    }
+    /* Mobile menu animation */
+    @keyframes slideIn {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-slide-in {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-white shadow-md py-3">
+  <div class="container mx-auto px-4 flex justify-between items-center">
+    <h1 class="text-xl md:text-2xl font-bold text-green-600 cursor-pointer" onclick="window.location.href='index.html'">RozanaKart</h1>
+    <div class="flex items-center space-x-4 relative">
+      <div class="relative cursor-pointer" id="cartIcon">
+        <span class="text-2xl">🛒</span>
+        <span class="cart-badge hidden" id="cartCount">0</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- Main Content -->
+<main class="container mx-auto px-4 py-6">
+  <h2 class="text-2xl md:text-3xl font-bold mb-6 text-center md:text-left">Cold Drinks</h2>
+  
+  <!-- Product Grid -->
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+
+    <!-- Product 1 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/coke.png" alt="Coca-Cola" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Coca-Cola</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹35</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Coca-Cola" data-price="35">Add to Cart</button>
+    </div>
+
+    <!-- Product 2 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/dew.png" alt="Mountain Dew" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Mountain Dew</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹40</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Mountain Dew" data-price="40">Add to Cart</button>
+    </div>
+
+    <!-- Product 3 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/sprite.png" alt="Sprite" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Sprite</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹35</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Sprite" data-price="35">Add to Cart</button>
+    </div>
+
+    <!-- Product 4 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/marinda.png" alt="Marinda" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Marinda</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹25</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Marinda" data-price="25">Add to Cart</button>
+    </div>
+
+    <!-- Product 5 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/nimbooz.png" alt="Nimbooz" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Nimbooz</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹25</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Nimbooz" data-price="25">Add to Cart</button>
+    </div>
+
+    <!-- Product 6 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/frooti.png" alt="Frooti" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Frooti</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹60 (pack of 5)</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Frooti (pack of 5)" data-price="60">Add to Cart</button>
+    </div>
+
+    <!-- Product 7 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/water.png" alt="Water" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Water</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹25</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Water" data-price="25">Add to Cart</button>
+    </div>
+
+    <!-- Product 8 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/mangu mangu.png" alt="Mangu Mango" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Mangu Mango</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹75</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Mangu Mango" data-price="75">Add to Cart</button>
+    </div>
+
+    <!-- Product 9 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/sting.png" alt="Sting" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Sting</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹25</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Sting" data-price="25">Add to Cart</button>
+    </div>
+
+    <!-- Product 10 -->
+    <div class="bg-white rounded-lg shadow p-3 text-center product-card">
+      <span class="chill-tag">❄️ chill</span>
+      <img src="./C coldrinks images/maaza.png" alt="Maaza" class="mx-auto mb-3 product-image" />
+      <h3 class="font-semibold mb-1 text-sm md:text-base">Maaza</h3>
+      <p class="text-green-600 font-bold text-sm md:text-base">₹45</p>
+      <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded text-sm md:text-base hover:bg-green-700 add-to-cart" data-name="Maaza" data-price="45">Add to Cart</button>
+    </div>
+
+  </div>
+</main>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar" class="fixed top-0 right-0 h-full w-full sm:w-96 bg-white shadow-lg transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto">
+  <div class="p-4">
+    <div class="flex justify-between items-center border-b pb-3">
+      <h3 class="text-xl font-bold">Your Cart</h3>
+      <button id="closeCart" class="text-gray-500 hover:text-gray-700">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+    
+    <div id="cartItems" class="py-4 space-y-3">
+      <!-- Cart items will be added here dynamically -->
+      <p id="emptyCartMessage" class="text-gray-500 text-center py-8">Your cart is empty</p>
+    </div>
+    
+    <div class="border-t pt-3">
+      <div class="flex justify-between mb-2">
+        <span>Subtotal:</span>
+        <span id="cartSubtotal">₹0</span>
+      </div>
+      <div class="flex justify-between mb-2">
+        <span>Handling Charges:</span>
+        <span id="handlingCharges">₹10</span>
+      </div>
+      <div class="flex justify-between font-bold text-lg">
+        <span>Total:</span>
+        <span id="cartTotal">₹10</span>
+      </div>
+      <button id="checkoutBtn" class="mt-4 w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed" disabled>
+        Checkout on WhatsApp
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-green-700 text-white py-6 text-center mt-10">
+  <p class="text-sm">&copy; 2025 RozanaKart. All rights reserved.</p>
+  <p class="text-xs mt-1">RozanaKart delivers groceries and essentials in Handwara, Kashmir.</p>
+</footer>
+
+<script>
+  // Cart functionality
+  let cart = [];
+  const handlingCharge = 10;
+  
+  // DOM elements
+  const cartIcon = document.getElementById('cartIcon');
+  const cartCount = document.getElementById('cartCount');
+  const cartSidebar = document.getElementById('cartSidebar');
+  const closeCart = document.getElementById('closeCart');
+  const cartItems = document.getElementById('cartItems');
+  const emptyCartMessage = document.getElementById('emptyCartMessage');
+  const cartSubtotal = document.getElementById('cartSubtotal');
+  const cartTotal = document.getElementById('cartTotal');
+  const checkoutBtn = document.getElementById('checkoutBtn');
+  const addToCartButtons = document.querySelectorAll('.add-to-cart');
+  
+  // Toggle cart sidebar
+  cartIcon.addEventListener('click', () => {
+    cartSidebar.classList.toggle('translate-x-full');
+    document.body.style.overflow = cartSidebar.classList.contains('translate-x-full') ? 'auto' : 'hidden';
+  });
+  
+  closeCart.addEventListener('click', () => {
+    cartSidebar.classList.add('translate-x-full');
+    document.body.style.overflow = 'auto';
+  });
+  
+  // Add to cart functionality
+  addToCartButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const name = button.getAttribute('data-name');
+      const price = parseInt(button.getAttribute('data-price'));
+      
+      // Check if item already exists in cart
+      const existingItem = cart.find(item => item.name === name);
+      
+      if (existingItem) {
+        existingItem.quantity += 1;
+      } else {
+        cart.push({
+          name,
+          price,
+          quantity: 1
+        });
+      }
+      
+      updateCart();
+      
+      // Add animation to button
+      button.textContent = 'Added!';
+      button.classList.add('bg-green-700');
+      setTimeout(() => {
+        button.textContent = 'Add to Cart';
+        button.classList.remove('bg-green-700');
+      }, 1000);
+    });
+  });
+  
+  // Update cart UI
+  function updateCart() {
+    // Update cart count
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartCount.textContent = totalItems;
+    
+    if (totalItems > 0) {
+      cartCount.classList.remove('hidden');
+    } else {
+      cartCount.classList.add('hidden');
+    }
+    
+    // Update cart items list
+    cartItems.innerHTML = '';
+    
+    if (cart.length === 0) {
+      emptyCartMessage.classList.remove('hidden');
+      checkoutBtn.disabled = true;
+    } else {
+      emptyCartMessage.classList.add('hidden');
+      checkoutBtn.disabled = false;
+      
+      cart.forEach((item, index) => {
+        const cartItem = document.createElement('div');
+        cartItem.className = 'flex justify-between items-center border-b pb-2';
+        cartItem.innerHTML = `
+          <div>
+            <h4 class="font-medium">${item.name}</h4>
+            <p class="text-sm text-gray-600">₹${item.price} x ${item.quantity}</p>
+          </div>
+          <div class="flex items-center">
+            <span class="font-bold mr-4">₹${item.price * item.quantity}</span>
+            <button class="remove-item text-red-500 hover:text-red-700" data-index="${index}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        `;
+        cartItems.appendChild(cartItem);
+      });
+      
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-item').forEach(button => {
+        button.addEventListener('click', (e) => {
+          const index = parseInt(e.target.closest('button').getAttribute('data-index'));
+          cart.splice(index, 1);
+          updateCart();
+        });
+      });
+    }
+    
+    // Update totals
+    const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    const total = subtotal + handlingCharge;
+    
+    cartSubtotal.textContent = `₹${subtotal}`;
+    cartTotal.textContent = `₹${total}`;
+  }
+  
+  // Checkout functionality
+  checkoutBtn.addEventListener('click', () => {
+    if (cart.length === 0) return;
+    
+    // Create WhatsApp message
+    let message = "Hello RozanaKart, I'd like to order:\n\n";
+    
+    cart.forEach(item => {
+      message += `${item.name} - ${item.quantity} x ₹${item.price} = ₹${item.quantity * item.price}\n`;
+    });
+    
+    message += `\nSubtotal: ₹${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0)}`;
+    message += `\nHandling Charges: ₹${handlingCharge}`;
+    message += `\nTotal: ₹${cart.reduce((sum, item) => sum + (item.price * item.quantity), 0) + handlingCharge}`;
+    message += "\n\nPlease confirm my order. Thank you!";
+    
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(message);
+    
+    // Open WhatsApp with the order
+    window.open(`https://wa.me/916006366254?text=${encodedMessage}`, '_blank');
+  });
+</script>
+
+</body>
+</html>

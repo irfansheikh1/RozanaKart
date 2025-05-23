@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Snacks - RozanaKart</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <style>
+    /* Card hover effects */
+    .card {
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Snack tags */
+    .snack-tag {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background-color: rgba(236, 72, 153, 0.9);
+      color: white;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      z-index: 10;
+    }
+    
+    /* Cart sidebar styles */
+    .cart-sidebar {
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+      width: 90vw;
+      max-width: 400px;
+    }
+    .cart-sidebar.open {
+      transform: translateX(0);
+    }
+    .cart-overlay {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .cart-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    /* Animation for added items */
+    .added-to-cart {
+      animation: bounce 0.5s;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    /* Image sizing */
+    .snack-img {
+      height: 120px;
+      object-fit: contain;
+      width: 100%;
+      transition: transform 0.3s ease;
+    }
+    .card:hover .snack-img {
+      transform: scale(1.05);
+    }
+    
+    @media (min-width: 640px) {
+      .snack-img {
+        height: 150px;
+      }
+    }
+    
+    @media (min-width: 1024px) {
+      .snack-img {
+        height: 160px;
+      }
+    }
+    
+    /* Product title */
+    .product-title {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 3em;
+      line-height: 1.5em;
+    }
+    
+    /* Header sticky behavior */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    
+    /* Search modal */
+    .search-modal {
+      transform: translateY(-100%);
+      transition: transform 0.3s ease;
+    }
+    .search-modal.open {
+      transform: translateY(0);
+    }
+    
+    /* Mobile optimizations */
+    @media (max-width: 640px) {
+      .desktop-search {
+        display: none;
+      }
+      .header {
+        padding: 12px;
+      }
+    }
+    
+    @media (min-width: 641px) {
+      .mobile-search-btn {
+        display: none;
+      }
+    }
+    
+    /* Smooth transitions */
+    .transition-slow {
+      transition: all 0.3s ease;
+    }
+    
+    /* Pulse animation for search button */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .pulse:hover {
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* Quick add button for mobile */
+    .quick-add-btn {
+      display: none;
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background-color: rgba(236, 72, 153, 0.9);
+      color: white;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+    
+    @media (max-width: 640px) {
+      .quick-add-btn {
+        display: flex;
+      }
+      .add-to-cart {
+        display: none;
+      }
+      .card:hover .quick-add-btn {
+        transform: scale(1.1);
+      }
+    }
+    
+    /* Cart item counter */
+    .cart-item-counter {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #fff;
+      color: #ec4899;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Header -->
+  <header class="header bg-white shadow-sm">
+    <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+      <!-- Logo -->
+      <div class="flex items-center cursor-pointer" onclick="window.location.href='index.html'">
+        <span class="text-xl md:text-2xl font-bold text-pink-600">RozanaKart</span>
+      </div>
+      
+      <!-- Desktop location -->
+      <div class="hidden md:flex items-center text-sm cursor-pointer ml-4">
+        <i class="fas fa-map-marker-alt text-pink-600 mr-1"></i>
+        <span class="font-medium">Handwara, Kashmir</span>
+      </div>
+      
+      <!-- Desktop Search bar -->
+      <div class="hidden md:flex flex-1 mx-4 max-w-md">
+        <div class="desktop-search relative flex items-center bg-gray-100 rounded-full px-4 py-2 w-full">
+          <i class="fas fa-search text-gray-500 mr-2"></i>
+          <input 
+            type="text" 
+            placeholder="Search snacks..." 
+            class="w-full bg-transparent outline-none text-sm placeholder-gray-500"
+            id="desktop-search-input"
+          />
+        </div>
+      </div>
+      
+      <!-- User actions -->
+      <div class="flex items-center space-x-4">
+        <!-- Mobile search button -->
+        <button class="mobile-search-btn text-gray-600" id="mobile-search-btn">
+          <i class="fas fa-search text-xl"></i>
+        </button>
+        
+        <button class="hidden md:flex items-center text-sm font-medium">
+          <i class="fas fa-user-circle text-xl text-gray-600"></i>
+        </button>
+        <button class="relative" id="cart-icon">
+          <i class="fas fa-shopping-cart text-xl text-gray-600"></i>
+          <span class="absolute -top-2 -right-2 bg-pink-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-count">0</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Mobile Search Modal -->
+    <div class="search-modal absolute top-0 left-0 w-full bg-white shadow-md py-3 px-4 z-40" id="search-modal">
+      <div class="flex items-center">
+        <div class="relative flex items-center bg-gray-100 rounded-full px-4 py-2 w-full">
+          <i class="fas fa-search text-gray-500 mr-2"></i>
+          <input 
+            type="text" 
+            placeholder="Search snacks..." 
+            class="w-full bg-transparent outline-none text-sm placeholder-gray-500"
+            id="mobile-search-input"
+          />
+          <button class="ml-2 text-gray-500" id="close-search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="p-4 md:p-6">
+    <!-- Hero section -->
+    <div class="bg-gradient-to-r from-pink-500 to-pink-600 rounded-xl p-6 mb-6 text-white text-center">
+      <h1 class="text-2xl md:text-3xl font-bold mb-2">Delicious Snacks Delivered</h1>
+      <p class="text-sm md:text-base mb-4">Order before 3pm for same-day delivery in Handwara</p>
+      <div class="flex justify-center space-x-2">
+        <span class="bg-white text-pink-600 px-3 py-1 rounded-full text-xs font-bold">⭐ 4.8 Rating</span>
+        <span class="bg-white text-pink-600 px-3 py-1 rounded-full text-xs font-bold">🍟 Fresh & Crispy</span>
+      </div>
+    </div>
+
+    <!-- Snacks grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6" id="snacks-grid">
+
+      <!-- American Lays -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🔥 Hot</span>
+        <img src="./c snacks images/american lays.png" alt="American Lays" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">American Lays</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹20</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="American Lays" data-price="20" data-img="./c snacks images/american lays.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="American Lays" data-price="20" data-img="./c snacks images/american lays.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Badam Lachha -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🧀 Popular</span>
+        <img src="./c snacks images/badam lacchaa.png" alt="Badam Lachha" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Badam Lachha</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹100</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Badam Lachha" data-price="100" data-img="./c snacks images/badam lacchaa.png">    
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Badam Lachha" data-price="100" data-img="./c snacks images/badam lacchaa.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Moong Dal -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🍫 Namkeen</span>
+        <img src="./c snacks images/bicano daal.png" alt="Moong Dal" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Moong Dal</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹65</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Moong Dal" data-price="65" data-img="./c snacks images/bicano daal.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Moong Dal" data-price="65" data-img="./c snacks images/bicano daal.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Kurkure -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🌶 Spicy</span>
+        <img src="./c snacks images/kurkure.png" alt="Kurkure" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Kurkure</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹10</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Kurkure" data-price="10" data-img="./c snacks images/kurkure.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Kurkure" data-price="10" data-img="./c snacks images/kurkure.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Munch -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🍫 Chocolate</span>
+        <img src="./c snacks images/munch pack.png" alt="Munch" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Munch</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹40</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Munch" data-price="40" data-img="./c snacks images/munch pack.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Munch" data-price="40" data-img="./c snacks images/munch pack.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Salty Peanuts -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🥜 Crunchy</span>
+        <img src="./c snacks images/salty nuts.png" alt="Salty Peanuts" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Salty Peanuts</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹65</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Salty Peanuts" data-price="65" data-img="./c snacks images/salty nuts.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Salty Peanuts" data-price="65" data-img="./c snacks images/salty nuts.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Paneer Bhujia -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🧀 Cheesy</span>
+        <img src="./c snacks images/paneer bhujia.png" alt="Paneer Bhujia" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Paneer Bhujia</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹75</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Paneer Bhujia" data-price="75" data-img="./c snacks images/paneer bhujia.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Paneer Bhujia" data-price="75" data-img="./c snacks images/paneer bhujia.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Soan Papdi -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🍬 Sweet</span>
+        <img src="./c snacks images/soan papdi.png" alt="Soan Papdi" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Soan Papdi</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹60</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Soan Papdi" data-price="60" data-img="./c snacks images/soan papdi.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Soan Papdi" data-price="60" data-img="./c snacks images/soan papdi.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+
+      <!-- Ganthiya Daal -->
+      <div class="bg-white p-3 rounded-xl card border border-gray-100 relative">
+        <span class="snack-tag">🌶 Spicy</span>
+        <img src="./c snacks images/Ganthiya daal.png" alt="Ganthiya Daal" class="w-full snack-img rounded-md mb-3">
+        <h3 class="product-title font-semibold mb-2 text-sm md:text-base">Ganthiya Daal</h3>
+        <p class="text-lg font-semibold text-pink-600 mb-3">₹65</p>
+        <button class="add-to-cart w-full bg-pink-600 text-white py-2 rounded-lg hover:bg-pink-700 text-sm md:text-base transition-colors" 
+                data-name="Ganthiya Daal" data-price="65" data-img="./c snacks images/Ganthiya daal.png">
+          Add to Cart
+        </button>
+        <button class="quick-add-btn add-to-cart" 
+                data-name="Ganthiya Daal" data-price="65" data-img="./c snacks images/Ganthiya daal.png">
+          <i class="fas fa-plus"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Mobile floating action button -->
+  <div class="md:hidden fixed bottom-6 right-6 z-40">
+    <button id="mobile-cart-btn" class="bg-pink-600 text-white rounded-full p-4 shadow-lg pulse">
+      <i class="fas fa-shopping-cart text-xl"></i>
+      <span class="absolute -top-1 -right-1 bg-white text-pink-600 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold" id="mobile-cart-count">0</span>
+    </button>
+  </div>
+
+  <!-- Cart Sidebar -->
+  <div class="cart-overlay fixed inset-0 bg-black bg-opacity-50 z-50"></div>
+  <div class="cart-sidebar fixed top-0 right-0 h-full bg-white shadow-lg z-50 overflow-y-auto">
+    <div class="p-4 h-full flex flex-col">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-xl font-bold">Your Snack Cart</h2>
+        <button id="close-cart" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times text-xl"></i>
+        </button>
+      </div>
+      
+      <div id="cart-items" class="flex-1 overflow-y-auto mb-4">
+        <!-- Cart items will be added here dynamically -->
+        <div class="flex flex-col items-center justify-center h-full" id="empty-cart-message">
+          <i class="fas fa-shopping-basket text-4xl text-gray-300 mb-4"></i>
+          <p class="text-gray-500 text-center">Your cart is empty</p>
+          <p class="text-sm text-gray-400 mt-2">Add some tasty snacks!</p>
+        </div>
+      </div>
+      
+      <div class="border-t pt-4">
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">Subtotal:</span>
+          <span class="font-bold" id="cart-subtotal">₹0</span>
+        </div>
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">Delivery:</span>
+          <span class="font-bold">Handling Charges ₹10</span>
+        </div>
+        <div class="flex justify-between text-lg font-bold mb-4">
+          <span>Total:</span>
+          <span id="cart-total">₹0</span>
+        </div>
+        
+        <button id="checkout-btn" class="w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors mb-2" disabled>
+          <i class="fab fa-whatsapp mr-2"></i> Order via WhatsApp
+        </button>
+        <p class="text-xs text-center text-gray-500">You'll be redirected to WhatsApp to complete your order</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-pink-700 text-white py-6 text-center mt-8">
+    <div class="container mx-auto px-4">
+      <p class="text-sm">&copy; 2025 RozanaKart. All rights reserved.</p>
+      <p class="text-xs mt-2">Delivering tasty snacks in Handwara, Kashmir</p>
+      <div class="mt-4 flex justify-center space-x-4">
+       
+        
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize cart
+      let cart = JSON.parse(localStorage.getItem('cart')) || [];
+      const cartCountElements = [document.getElementById('cart-count'), document.getElementById('mobile-cart-count')];
+      const cartItemsContainer = document.getElementById('cart-items');
+      const emptyCartMessage = document.getElementById('empty-cart-message');
+      const cartSubtotal = document.getElementById('cart-subtotal');
+      const cartTotal = document.getElementById('cart-total');
+      const checkoutBtn = document.getElementById('checkout-btn');
+      const cartIcon = document.getElementById('cart-icon');
+      const mobileCartBtn = document.getElementById('mobile-cart-btn');
+      const closeCartBtn = document.getElementById('close-cart');
+      const cartSidebar = document.querySelector('.cart-sidebar');
+      const cartOverlay = document.querySelector('.cart-overlay');
+      const mobileSearchBtn = document.getElementById('mobile-search-btn');
+      const closeSearchBtn = document.getElementById('close-search');
+      const searchModal = document.getElementById('search-modal');
+      const desktopSearchInput = document.getElementById('desktop-search-input');
+      const mobileSearchInput = document.getElementById('mobile-search-input');
+      const snacksGrid = document.getElementById('snacks-grid');
+      const snackCards = document.querySelectorAll('.card');
+      
+      // Update cart count display
+      function updateCartCount() {
+        const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+        cartCountElements.forEach(el => el.textContent = totalItems);
+      }
+      
+      // Update cart display
+      function updateCartDisplay() {
+        // Clear current items
+        cartItemsContainer.innerHTML = '';
+        
+        if (cart.length === 0) {
+          cartItemsContainer.appendChild(emptyCartMessage);
+          checkoutBtn.disabled = true;
+        } else {
+          emptyCartMessage.remove();
+          checkoutBtn.disabled = false;
+          
+          // Add each item to the cart display
+          cart.forEach((item, index) => {
+            const cartItem = document.createElement('div');
+            cartItem.className = 'flex justify-between items-center py-3 border-b';
+            cartItem.innerHTML = `
+              <div class="flex items-center">
+                <img src="${item.img}" alt="${item.name}" class="w-12 h-12 rounded-md object-cover mr-3">
+                <div>
+                  <h4 class="font-medium text-sm">${item.name}</h4>
+                  <p class="text-xs text-gray-500">₹${item.price} each</p>
+                </div>
+              </div>
+              <div class="flex items-center">
+                <div class="flex items-center mr-3">
+                  <button class="decrease-quantity text-gray-500 hover:text-pink-600" data-index="${index}">
+                    <i class="fas fa-minus text-xs"></i>
+                  </button>
+                  <span class="mx-2 text-sm">${item.quantity}</span>
+                  <button class="increase-quantity text-gray-500 hover:text-pink-600" data-index="${index}">
+                    <i class="fas fa-plus text-xs"></i>
+                  </button>
+                </div>
+                <p class="font-bold text-sm mr-2">₹${item.price * item.quantity}</p>
+                <button class="remove-item text-red-500 hover:text-red-700" data-index="${index}">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            `;
+            cartItemsContainer.appendChild(cartItem);
+          });
+        }
+        
+        // Calculate and update totals
+        const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity +10), 0);
+        cartSubtotal.textContent = `₹${subtotal}`;
+        cartTotal.textContent = `₹${subtotal}`;
+        
+        // Update cart count
+        updateCartCount();
+        
+        // Save to localStorage
+        localStorage.setItem('cart', JSON.stringify(cart));
+      }
+      
+      // Add to cart functionality
+      function addToCartHandler(button) {
+        const name = button.getAttribute('data-name');
+        const price = parseInt(button.getAttribute('data-price'));
+        const img = button.getAttribute('data-img');
+        
+        // Check if item already exists in cart
+        const existingItemIndex = cart.findIndex(item => item.name === name);
+        
+        if (existingItemIndex !== -1) {
+          // Increase quantity if item exists
+          cart[existingItemIndex].quantity += 1;
+        } else {
+          // Add new item to cart
+          cart.push({
+            name,
+            price,
+            img,
+            quantity: 1
+          });
+        }
+        
+        // Update cart display
+        updateCartDisplay();
+        
+        // Show cart sidebar on desktop
+        if (window.innerWidth > 768) {
+          cartSidebar.classList.add('open');
+          cartOverlay.classList.add('open');
+        }
+        
+        // Show mini notification on mobile
+        if (window.innerWidth <= 768) {
+          showMobileNotification(name);
+        }
+        
+        // Animate button
+        button.classList.add('added-to-cart');
+        setTimeout(() => {
+          button.classList.remove('added-to-cart');
+        }, 500);
+      }
+      
+      // Show mobile notification
+      function showMobileNotification(productName) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed bottom-20 right-4 bg-pink-600 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce';
+        notification.innerHTML = `
+          <div class="flex items-center">
+            <i class="fas fa-check-circle mr-2"></i>
+            <span>Added ${productName} to cart</span>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.remove();
+        }, 2000);
+      }
+      
+      // Attach event listeners to all add-to-cart buttons
+      document.querySelectorAll('.add-to-cart').forEach(button => {
+        button.addEventListener('click', function() {
+          addToCartHandler(this);
+        });
+      });
+    
+      // Handle cart item quantity changes and removal
+      cartItemsContainer.addEventListener('click', function(e) {
+        if (e.target.closest('.increase-quantity')) {
+          const index = e.target.closest('.increase-quantity').getAttribute('data-index');
+          cart[index].quantity += 1;
+          updateCartDisplay();
+        } else if (e.target.closest('.decrease-quantity')) {
+          const index = e.target.closest('.decrease-quantity').getAttribute('data-index');
+          if (cart[index].quantity > 1) {
+            cart[index].quantity -= 1;
+          } else {
+            cart.splice(index, 1);
+          }
+          updateCartDisplay();
+        } else if (e.target.closest('.remove-item')) {
+          const index = e.target.closest('.remove-item').getAttribute('data-index');
+          cart.splice(index, 1);
+          updateCartDisplay();
+        }
+      });
+      
+      // Toggle cart sidebar
+      function openCart() {
+        cartSidebar.classList.add('open');
+        cartOverlay.classList.add('open');
+      }
+      
+      cartIcon.addEventListener('click', openCart);
+      mobileCartBtn.addEventListener('click', openCart);
+      
+      closeCartBtn.addEventListener('click', function() {
+        cartSidebar.classList.remove('open');
+        cartOverlay.classList.remove('open');
+      });
+      
+      cartOverlay.addEventListener('click', function() {
+        cartSidebar.classList.remove('open');
+        cartOverlay.classList.remove('open');
+      });
+      
+      // Checkout functionality - redirect to WhatsApp
+      checkoutBtn.addEventListener('click', function() {
+        if (cart.length === 0) return;
+        
+        // Format the order message
+        let message = `Hello RozanaKart! I'd like to place an order for snacks:\n\n`;
+        
+        cart.forEach(item => {
+          message += `${item.name} - ${item.quantity} x ₹${item.price} = ₹${item.quantity * item.price}\n`;
+        });
+        
+        const subtotal = cart.reduce((total, item) => total + (item.price * item.quantity), 0);
+        message += `\nTotal: ₹${subtotal}\n\nDelivery to: [Your Address]\n\nPayment method: [Cash on Delivery/Online Payment]`;
+        
+        // Encode the message for URL
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Redirect to WhatsApp with the order
+        window.open(`https://wa.me/916006366254?text=${encodedMessage}`, '_blank');
+      });
+      
+      // Search functionality
+      function filterSnacks(searchTerm) {
+        const term = searchTerm.toLowerCase();
+        snackCards.forEach(card => {
+          const title = card.querySelector('.product-title').textContent.toLowerCase();
+          if (title.includes(term)) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      }
+      
+      // Mobile search toggle
+      mobileSearchBtn.addEventListener('click', function() {
+        searchModal.classList.add('open');
+        mobileSearchInput.focus();
+      });
+      
+      closeSearchBtn.addEventListener('click', function() {
+        searchModal.classList.remove('open');
+      });
+      
+      // Search input events
+      desktopSearchInput.addEventListener('input', function() {
+        filterSnacks(this.value);
+      });
+      
+      mobileSearchInput.addEventListener('input', function() {
+        filterSnacks(this.value);
+      });
+      
+      // Close search when clicking outside (for mobile)
+      document.addEventListener('click', function(e) {
+        if (!searchModal.contains(e.target) && e.target !== mobileSearchBtn) {
+          searchModal.classList.remove('open');
+        }
+      });
+      
+      // Initialize cart display
+      updateCartDisplay();
+      
+      // Add swipe gesture for mobile cart
+      let touchStartX = 0;
+      let touchEndX = 0;
+      
+      cartSidebar.addEventListener('touchstart', function(e) {
+        touchStartX = e.changedTouches[0].screenX;
+      }, false);
+      
+      cartSidebar.addEventListener('touchend', function(e) {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchStartX - touchEndX > 50) {
+          cartSidebar.classList.remove('open');
+          cartOverlay.classList.remove('open');
+        }
+      }, false);
+    });
+  </script>
+</body>
+</html>
